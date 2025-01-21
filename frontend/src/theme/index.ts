@@ -15,22 +15,22 @@ const baseTheme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#6C63FF",
-      light: "#9D97FF",
-      dark: "#4B45B3",
+      main: "#00BFA6", // Bright teal
+      light: "#33FFDA",
+      dark: "#008C7A",
     },
     secondary: {
-      main: "#FF6584",
-      light: "#FF8FA3",
-      dark: "#B34659",
+      main: "#FF4B8B", // Bright pink
+      light: "#FF7EB3",
+      dark: "#CC3366",
     },
     background: {
-      default: "#1A1A2E",
-      paper: "#232342",
+      default: "#0A1929", // Deep navy
+      paper: "#132F4C", // Lighter navy
     },
     text: {
       primary: "#FFFFFF",
-      secondary: "#B3B3CC",
+      secondary: "#B2BAC2",
     },
   },
   typography: {
@@ -117,18 +117,53 @@ const baseTheme = createTheme({
         root: {
           "& .MuiOutlinedInput-root": {
             borderRadius: 12,
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
+            backgroundColor: "rgba(19, 47, 76, 0.8)",
+            backdropFilter: "blur(8px)",
             transition: "all 0.2s ease-in-out",
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.08)",
+            // "&:hover": {
+            //   backgroundColor: "rgba(19, 47, 76, 0.95)",
+            //   "& .MuiOutlinedInput-notchedOutline": {
+            //     borderColor: "#00BFA6",
+            //   },
+            // },
+            "&.Mui-focused": {
+              backgroundColor: "#1E3A5F",
+              boxShadow: "0 0 0 2px rgba(0, 191, 166, 0.2)",
               "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: "#6C63FF",
+                borderColor: "#00BFA6",
+                borderWidth: 2,
               },
             },
-            "&.Mui-focused": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              boxShadow: "0 0 0 2px rgba(108, 99, 255, 0.2)",
+            "& input": {
+              color: "#FFFFFF",
+              "&::placeholder": {
+                color: "#B2BAC2",
+                opacity: 1,
+              },
             },
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "rgba(0, 191, 166, 0.2)",
+            },
+          },
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: "#132F4C",
+          backgroundImage: "none",
+          boxShadow: "0px 4px 24px rgba(0, 0, 0, 0.4)",
+          "&::before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: "100%",
+            background:
+              "linear-gradient(180deg, rgba(0, 191, 166, 0.05) 0%, rgba(255, 75, 139, 0.05) 100%)",
+            pointerEvents: "none",
           },
         },
       },
@@ -140,8 +175,75 @@ const baseTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
-          boxShadow: "0px 4px 24px rgba(0, 0, 0, 0.25)",
+          boxShadow: "0px 4px 24px rgba(0, 0, 0, 0.4)",
           borderRadius: 16,
+          backgroundColor: "#132F4C",
+          "&.ag-theme-material": {
+            "--ag-background-color": "#132F4C",
+            "--ag-foreground-color": "#FFFFFF",
+            "--ag-secondary-foreground-color": "#B2BAC2",
+            "--ag-row-hover-color": "rgba(0, 191, 166, 0.08)",
+            "--ag-selected-row-background-color": "rgba(0, 191, 166, 0.16)",
+            "--ag-header-background-color": "#1E3A5F",
+            "--ag-odd-row-background-color": "#1A3251",
+            "--ag-control-panel-background-color": "#132F4C",
+            "--ag-subheader-background-color": "#1E3A5F",
+            "--ag-input-focus-border-color": "#00BFA6",
+            "--ag-border-color": "rgba(0, 191, 166, 0.2)",
+            "--ag-secondary-border-color": "rgba(0, 191, 166, 0.1)",
+            "--ag-header-column-separator-color": "rgba(0, 191, 166, 0.2)",
+            "--ag-input-border-color": "rgba(0, 191, 166, 0.3)",
+            "--ag-input-focus-box-shadow": "0 0 2px rgba(0, 191, 166, 0.3)",
+            "& input": {
+              color: "#FFFFFF !important",
+              backgroundColor: "#1E3A5F !important",
+              border: "1px solid rgba(0, 191, 166, 0.3) !important",
+              "&:focus": {
+                backgroundColor: "#2A4870 !important",
+                border: "2px solid #00BFA6 !important",
+                boxShadow: "0 0 0 2px rgba(0, 191, 166, 0.2) !important",
+              },
+            },
+            "& .ag-header-cell:hover": {
+              backgroundColor: "transparent !important",
+            },
+            "& .ag-popup": {
+              backgroundColor: "#1E3A5F !important",
+              border: "1px solid rgba(0, 191, 166, 0.2) !important",
+            },
+            "& .ag-popup-child": {
+              backgroundColor: "#1E3A5F !important",
+            },
+            "& .ag-menu": {
+              backgroundColor: "#1E3A5F !important",
+            },
+            "& .ag-menu-option": {
+              backgroundColor: "#1E3A5F !important",
+            },
+            "& .ag-menu-option-active": {
+              backgroundColor: "#1E3A5F !important",
+            },
+            "& .ag-filter-toolpanel-header": {
+              backgroundColor: "#1E3A5F !important",
+            },
+            "& .ag-filter-toolpanel-group-item:hover": {
+              backgroundColor: "transparent !important",
+            },
+            "& .ag-filter-apply-panel": {
+              backgroundColor: "#1E3A5F !important",
+            },
+            "& .ag-floating-filter-input": {
+              "&:hover": {
+                backgroundColor: "#1E3A5F !important",
+              },
+            },
+            "& .ag-header-cell-hover": {
+              backgroundColor: "transparent !important",
+            },
+            "& .ag-header-cell-moving": {
+              backgroundColor: "transparent !important",
+            },
+          },
         },
       },
     },
@@ -167,7 +269,12 @@ const baseTheme = createTheme({
           borderRadius: 12,
         },
         contained: {
-          boxShadow: "0px 4px 12px rgba(108, 99, 255, 0.25)",
+          boxShadow: "0px 4px 12px rgba(0, 191, 166, 0.25)",
+          background: "linear-gradient(45deg, #00BFA6, #00D4BB)",
+          "&:hover": {
+            background: "linear-gradient(45deg, #00D4BB, #00E6CC)",
+            boxShadow: "0px 6px 16px rgba(0, 191, 166, 0.35)",
+          },
         },
       },
     },
@@ -179,11 +286,13 @@ const baseTheme = createTheme({
           overflow: "hidden",
           transition: "transform 0.2s ease-in-out",
           borderRadius: 16,
+          backgroundColor: "#1E3A5F",
           "@media (min-width:600px)": {
             borderRadius: 20,
           },
           "&:hover": {
             transform: "translateY(-4px)",
+            boxShadow: "0px 8px 32px rgba(0, 0, 0, 0.5)",
           },
         },
       },
@@ -192,6 +301,10 @@ const baseTheme = createTheme({
       styleOverrides: {
         root: {
           padding: 12,
+          color: "#00BFA6",
+          "&:hover": {
+            backgroundColor: "rgba(0, 191, 166, 0.08)",
+          },
         },
       },
     },

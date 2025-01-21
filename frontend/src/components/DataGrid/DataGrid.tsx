@@ -10,8 +10,24 @@ import {
 } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-material.css";
-import { IconButton, Tooltip, Box, styled } from "@mui/material";
-import { Visibility, Delete } from "@mui/icons-material";
+import {
+  IconButton,
+  Tooltip,
+  Box,
+  styled,
+  Button,
+  Stack,
+  Typography,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+} from "@mui/material";
+import {
+  Visibility,
+  Delete,
+  NavigateBefore,
+  NavigateNext,
+} from "@mui/icons-material";
 import { Car } from "../../types/car";
 import { Loader } from "../Loader/Loader";
 
@@ -32,6 +48,8 @@ interface DataGridProps {
 }
 
 const StyledGridBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
   height: 600,
   width: "100%",
   position: "relative",
@@ -58,6 +76,31 @@ const StyledGridBox = styled(Box)(({ theme }) => ({
     "--ag-card-radius": "12px",
     "--ag-popup-shadow": theme.shadows[3],
 
+    // Remove hover effects from filter rows
+    "& .ag-floating-filter-body": {
+      backgroundColor: "transparent !important",
+      "&:hover": {
+        backgroundColor: "transparent !important",
+      },
+    },
+    "& .ag-floating-filter-input": {
+      "&:hover": {
+        backgroundColor: "transparent !important",
+      },
+    },
+    "& .ag-floating-filter-button": {
+      "&:hover": {
+        backgroundColor: "transparent !important",
+      },
+    },
+    "& .ag-floating-filter": {
+      backgroundColor: "transparent !important",
+      "&:hover": {
+        backgroundColor: "transparent !important",
+      },
+    },
+
+    // Rest of the styles
     "& .ag-header": {
       borderBottom: `1px solid ${theme.palette.divider}`,
     },
@@ -111,6 +154,27 @@ const StyledGridBox = styled(Box)(({ theme }) => ({
       transition: "opacity 0.2s ease",
     },
   },
+}));
+
+const PaginationContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: theme.spacing(2),
+  borderTop: `1px solid ${theme.palette.divider}`,
+}));
+
+const PageButton = styled(Button)(({ theme }) => ({
+  minWidth: "40px",
+  height: "40px",
+  padding: theme.spacing(1),
+  margin: theme.spacing(0, 0.5),
+}));
+
+const StyledSelect = styled(Select)(({ theme }) => ({
+  height: "40px",
+  minWidth: "80px",
+  marginLeft: theme.spacing(2),
 }));
 
 export const DataGrid = memo(
@@ -208,15 +272,20 @@ export const DataGrid = memo(
       ];
     }, [rowData, actionRenderer]);
 
-    const onPaginationChanged = useCallback(() => {
-      const api = gridRef.current?.api;
-      if (!api) return;
+    const totalPages = Math.ceil(totalRows / pageSize);
 
-      const currentPage = api.paginationGetCurrentPage();
-      const currentPageSize = api.paginationGetPageSize();
+    const handlePageSizeChange = (event: SelectChangeEvent<unknown>) => {
+      const newPageSize = Number(event.target.value);
+      if (!isNaN(newPageSize)) {
+        onPageChange?.(1, newPageSize); // Reset to first page when changing page size
+      }
+    };
 
-      onPageChange?.(currentPage + 1, currentPageSize);
-    }, [onPageChange]);
+    const handlePageChange = (newPage: number) => {
+      if (newPage >= 1 && newPage <= totalPages) {
+        onPageChange?.(newPage, pageSize);
+      }
+    };
 
     const handleGridReady = useCallback(
       (params: GridReadyEvent) => {
@@ -243,7 +312,7 @@ export const DataGrid = memo(
         <div
           className="ag-theme-material"
           style={{
-            height: "100%",
+            flex: 1,
             width: "100%",
             opacity: isLoading ? 0.6 : 1,
             transition: "opacity 0.2s ease-in-out",
@@ -258,27 +327,63 @@ export const DataGrid = memo(
             rowHeight={48}
             rowStyle={{ alignItems: "center" }}
             onGridReady={handleGridReady}
-            pagination={true}
-            paginationPageSize={pageSize}
-            paginationPageSizeSelector={[10, 25, 50, 100]}
-            onPaginationChanged={onPaginationChanged}
-            suppressPaginationPanel={false}
+            pagination={false}
+            suppressPaginationPanel={true}
             animateRows={true}
             loadingOverlayComponent={null}
             suppressLoadingOverlay={true}
             rowModelType="clientSide"
-            paginationAutoPageSize={false}
             suppressScrollOnNewData={true}
             onFilterChanged={handleFilterChanged}
-            // Add these properties for proper pagination
             rowSelection="multiple"
             suppressRowClickSelection={true}
-            paginationNumberFormatter={(params) =>
-              `${params.value.toLocaleString()}`
-            }
           />
         </div>
         {isLoading && <Loader />}
+        <PaginationContainer>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Typography variant="body2" color="text.secondary">
+              Rows per page:
+            </Typography>
+            <StyledSelect
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              variant="outlined"
+              size="small"
+            >
+              {[10, 25, 50, 100].map((size) => (
+                <MenuItem key={size} value={size}>
+                  {size}
+                </MenuItem>
+              ))}
+            </StyledSelect>
+            <Typography variant="body2" color="text.secondary">
+              {`${(page - 1) * pageSize + 1}-${Math.min(
+                page * pageSize,
+                totalRows
+              )} of ${totalRows}`}
+            </Typography>
+          </Stack>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <PageButton
+              variant="outlined"
+              disabled={page === 1}
+              onClick={() => handlePageChange(page - 1)}
+            >
+              <NavigateBefore />
+            </PageButton>
+            <Typography variant="body2" color="text.secondary">
+              Page {page} of {totalPages}
+            </Typography>
+            <PageButton
+              variant="outlined"
+              disabled={page === totalPages}
+              onClick={() => handlePageChange(page + 1)}
+            >
+              <NavigateNext />
+            </PageButton>
+          </Stack>
+        </PaginationContainer>
       </StyledGridBox>
     );
   }
