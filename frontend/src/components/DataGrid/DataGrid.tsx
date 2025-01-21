@@ -223,16 +223,14 @@ export const DataGrid = memo(
         onGridReady?.(params);
 
         if (params.api) {
-          params.api.setDomLayout("normal");
-          params.api.paginationSetPageSize(pageSize);
+          params.api.updateGridOptions({
+            pagination: true,
+            paginationPageSize: pageSize,
+          });
 
-          // Set the total row count for proper pagination
-          const totalPages = Math.ceil(totalRows / pageSize);
+          params.api.paginationGoToPage(page - 1);
+
           params.api.setRowCount(totalRows);
-
-          // Ensure page is within bounds
-          const targetPage = Math.min(page - 1, totalPages - 1);
-          params.api.paginationGoToPage(targetPage);
         }
       },
       [onGridReady, page, pageSize, totalRows]
@@ -262,20 +260,16 @@ export const DataGrid = memo(
             paginationPageSize={pageSize}
             paginationPageSizeSelector={[10, 25, 50, 100]}
             onPaginationChanged={onPaginationChanged}
-            suppressPaginationPanel={false}
             animateRows={true}
             loadingOverlayComponent={null}
             suppressLoadingOverlay={true}
-            rowModelType="clientSide"
-            paginationAutoPageSize={false}
-            suppressScrollOnNewData={true}
             onFilterChanged={handleFilterChanged}
-            // Add these properties for proper pagination
             rowSelection="multiple"
             suppressRowClickSelection={true}
             paginationNumberFormatter={(params) =>
-              `${params.value.toLocaleString()}`
+              params.value.toLocaleString()
             }
+            suppressPaginationPanel={false}
           />
         </div>
         {isLoading && <Loader />}

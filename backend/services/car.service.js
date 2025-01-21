@@ -1,72 +1,78 @@
-const Car = require('../models/car');
-const logger = require('../config/logger');
+const Car = require("../models/car.model");
+const redisService = require("./redis.service");
+const logger = require("../config/logger");
 
 class CarService {
-  async getAllCars(query = {}) {
+  async getCars({ page = 1, limit = 10, search = "" }) {
     try {
-      const { search, filter, page = 1, limit = 10 } = query;
-      let dbQuery = {};
+      // Try to get from cache first
+      const cacheKey = redisService.getCarListKey(page, limit, search);
+      const cachedResult = await redisService.get(cacheKey);
 
-      // Handle search
-      if (search && search.trim()) {
-        const searchRegex = new RegExp(search.trim(), 'i');
-        dbQuery.$or = [
-          { Brand: searchRegex },
-          { Model: searchRegex },
-          { BodyStyle: searchRegex },
-          { PowerTrain: searchRegex }
-        ];
+      if (cachedResult) {
+        return cachedResult;
       }
 
-      // Handle filters
-      if (filter) {
-        const filters = Array.isArray(filter) ? filter : [filter];
-        filters.forEach(filterItem => {
-          const { field, operator, value } = JSON.parse(filterItem);
-          switch (operator) {
-            case 'contains':
-              dbQuery[field] = { $regex: value, $options: 'i' };
-              break;
-            case 'equals':
-              dbQuery[field] = value;
-              break;
-            case 'startsWith':
-              dbQuery[field] = { $regex: `^${value}`, $options: 'i' };
-              break;
-            case 'endsWith':
-              dbQuery[field] = { $regex: `${value}$`, $options: 'i' };
-              break;
-            case 'isEmpty':
-              dbQuery[field] = { $in: ['', null] };
-              break;
+      // If not in cache, fetch from database
+      const pageNum = parseInt(page);
+      const limitNum = parseInt(limit);
+      const skip = (pageNum - 1) * limitNum;
+
+      const query = search
+        ? {
+            $or: [
+              { Brand: { $regex: search, $options: "i" } },
+              { Model: { $regex: search, $options: "i" } },
+            ],
           }
-        });
-      }
+        : {};
 
-      const total = await Car.countDocuments(dbQuery);
-      const skip = (parseInt(page) - 1) * parseInt(limit);
-      
-      const cars = await Car.find(dbQuery)
-        .sort({ Brand: 1, Model: 1 })
-        .skip(skip)
-        .limit(parseInt(limit));
+      const [cars, total] = await Promise.all([
+        Car.find(query).skip(skip).limit(limitNum).lean(),
+        Car.countDocuments(query),
+      ]);
 
-      return {
+      const totalPages = Math.ceil(total / limitNum);
+      const validatedPage = Math.min(pageNum, totalPages);
+
+      const result = {
         cars,
         total,
-        page: parseInt(page),
-        totalPages: Math.ceil(total / parseInt(limit))
+        page: validatedPage,
+        totalPages,
+        hasNextPage: validatedPage < totalPages,
+        hasPrevPage: validatedPage > 1,
       };
+
+      // Cache the result for 5 minutes
+      await redisService.set(cacheKey, result, 300);
+
+      return result;
     } catch (error) {
-      logger.error('Error in getAllCars:', error);
+      logger.error("Error in getCars:", error);
       throw error;
     }
   }
 
   async getCarById(id) {
     try {
-      const car = await Car.findById(id);
-      logger.info(`Retrieved car with ID: ${id}`);
+      // Try to get from cache first
+      const cacheKey = redisService.getCarDetailKey(id);
+      const cachedCar = await redisService.get(cacheKey);
+
+      if (cachedCar) {
+        return cachedCar;
+      }
+
+      // If not in cache, fetch from database
+      const car = await Car.findById(id).lean();
+      if (!car) {
+        throw new Error("Car not found");
+      }
+
+      // Cache the car details for 10 minutes
+      await redisService.set(cacheKey, car, 600);
+
       return car;
     } catch (error) {
       logger.error(`Error retrieving car with ID ${id}:`, error);
@@ -75,17 +81,58 @@ class CarService {
   }
 
   async createCar(carData) {
-    const car = new Car(carData);
-    return car.save();
+    try {
+      const car = new Car(carData);
+      await car.save();
+
+      // Clear car list caches when a new car is added
+      await redisService.clearCarCaches();
+
+      return car;
+    } catch (error) {
+      logger.error("Error in createCar:", error);
+      throw error;
+    }
   }
 
   async updateCar(id, carData) {
-    return Car.findByIdAndUpdate(id, carData, { new: true });
+    try {
+      const car = await Car.findByIdAndUpdate(id, carData, {
+        new: true,
+        runValidators: true,
+      });
+
+      if (!car) {
+        throw new Error("Car not found");
+      }
+
+      // Clear both specific car cache and list caches
+      await redisService.clearCarCaches();
+
+      return car;
+    } catch (error) {
+      logger.error("Error in updateCar:", error);
+      throw error;
+    }
   }
 
   async deleteCar(id) {
-    return Car.findByIdAndDelete(id);
+    try {
+      const car = await Car.findByIdAndDelete(id);
+
+      if (!car) {
+        throw new Error("Car not found");
+      }
+
+      // Clear both specific car cache and list caches
+      await redisService.clearCarCaches();
+
+      return car;
+    } catch (error) {
+      logger.error("Error in deleteCar:", error);
+      throw error;
+    }
   }
 }
 
-module.exports = new CarService(); 
+module.exports = new CarService();
