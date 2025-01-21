@@ -1,4 +1,15 @@
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
+import type { ThemeOptions } from "@mui/material/styles";
+
+declare module "@mui/material/styles" {
+  interface BreakpointOverrides {
+    xs: true;
+    sm: true;
+    md: true;
+    lg: true;
+    xl: true;
+  }
+}
 
 const baseTheme = createTheme({
   palette: {
@@ -123,39 +134,26 @@ const baseTheme = createTheme({
       },
     },
     MuiPaper: {
+      defaultProps: {
+        elevation: 0,
+      },
       styleOverrides: {
         root: {
-          borderRadius: {
-            xs: 16,
-            sm: 20,
-          },
           backgroundImage: "none",
           boxShadow: "0px 4px 24px rgba(0, 0, 0, 0.25)",
+          borderRadius: 16,
         },
       },
     },
     MuiContainer: {
       styleOverrides: {
         root: {
-          paddingTop: {
-            xs: "1rem",
-            sm: "1.5rem",
-            md: "2rem",
+          padding: "1rem",
+          "@media (min-width:600px)": {
+            padding: "1.5rem",
           },
-          paddingBottom: {
-            xs: "1rem",
-            sm: "1.5rem",
-            md: "2rem",
-          },
-          paddingLeft: {
-            xs: "1rem",
-            sm: "1.5rem",
-            md: "2rem",
-          },
-          paddingRight: {
-            xs: "1rem",
-            sm: "1.5rem",
-            md: "2rem",
+          "@media (min-width:900px)": {
+            padding: "2rem",
           },
         },
       },
@@ -163,16 +161,10 @@ const baseTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: {
-            xs: 8,
-            sm: 12,
-          },
           textTransform: "none",
           fontWeight: 600,
-          padding: {
-            xs: "6px 16px",
-            sm: "8px 20px",
-          },
+          padding: "8px 20px",
+          borderRadius: 12,
         },
         contained: {
           boxShadow: "0px 4px 12px rgba(108, 99, 255, 0.25)",
@@ -182,14 +174,14 @@ const baseTheme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: {
-            xs: 16,
-            sm: 20,
-          },
           backgroundImage: "none",
           position: "relative",
           overflow: "hidden",
           transition: "transform 0.2s ease-in-out",
+          borderRadius: 16,
+          "@media (min-width:600px)": {
+            borderRadius: 20,
+          },
           "&:hover": {
             transform: "translateY(-4px)",
           },
@@ -199,15 +191,12 @@ const baseTheme = createTheme({
     MuiIconButton: {
       styleOverrides: {
         root: {
-          padding: {
-            xs: 8,
-            sm: 12,
-          },
+          padding: 12,
         },
       },
     },
   },
-});
+} as ThemeOptions);
 
 // Apply responsive font sizes and create the final theme
 export const theme = responsiveFontSizes(baseTheme, {

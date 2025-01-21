@@ -1,5 +1,6 @@
 import { TextField, InputAdornment, Box, styled } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import { useCallback } from "react";
 
 const StyledSearchBox = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -53,11 +54,24 @@ export const SearchBar = ({
   onSearch,
   disabled,
 }: SearchBarProps) => {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    onChange(newValue);
-    onSearch(newValue);
-  };
+  // Only update the parent's value, don't trigger search
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      onChange(newValue);
+    },
+    [onChange]
+  );
+
+  // Handle key press for manual search trigger
+  const handleKeyPress = useCallback(
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Enter") {
+        onSearch(value);
+      }
+    },
+    [onSearch, value]
+  );
 
   return (
     <StyledSearchBox>
@@ -67,6 +81,7 @@ export const SearchBar = ({
         placeholder="Search cars..."
         value={value}
         onChange={handleChange}
+        onKeyPress={handleKeyPress}
         disabled={disabled}
         InputProps={{
           startAdornment: (

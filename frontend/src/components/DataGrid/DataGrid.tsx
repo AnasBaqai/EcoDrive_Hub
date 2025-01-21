@@ -116,6 +116,7 @@ const StyledGridBox = styled(Box)(({ theme }) => ({
 export const DataGrid = memo(
   ({
     rowData,
+    totalRows,
     page,
     pageSize,
     isLoading,
@@ -224,10 +225,17 @@ export const DataGrid = memo(
         if (params.api) {
           params.api.setDomLayout("normal");
           params.api.paginationSetPageSize(pageSize);
-          params.api.paginationGoToPage(page - 1);
+
+          // Set the total row count for proper pagination
+          const totalPages = Math.ceil(totalRows / pageSize);
+          params.api.setRowCount(totalRows);
+
+          // Ensure page is within bounds
+          const targetPage = Math.min(page - 1, totalPages - 1);
+          params.api.paginationGoToPage(targetPage);
         }
       },
-      [onGridReady, page, pageSize]
+      [onGridReady, page, pageSize, totalRows]
     );
 
     return (
@@ -262,6 +270,12 @@ export const DataGrid = memo(
             paginationAutoPageSize={false}
             suppressScrollOnNewData={true}
             onFilterChanged={handleFilterChanged}
+            // Add these properties for proper pagination
+            rowSelection="multiple"
+            suppressRowClickSelection={true}
+            paginationNumberFormatter={(params) =>
+              `${params.value.toLocaleString()}`
+            }
           />
         </div>
         {isLoading && <Loader />}

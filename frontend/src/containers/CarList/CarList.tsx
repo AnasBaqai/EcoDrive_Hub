@@ -54,8 +54,13 @@ export const CarList = () => {
     };
   }, [cars]);
 
+  // Create a debounced search function
   const debouncedSearch = useMemo(
-    () => debounce((value: string) => setSearchTerm(value), 500),
+    () =>
+      debounce((value: string) => {
+        setSearchTerm(value);
+        setPage(1); // Reset to first page on search
+      }, 500),
     []
   );
 
@@ -80,6 +85,7 @@ export const CarList = () => {
     }
   }, [searchTerm, page, pageSize]);
 
+  // Fetch cars when dependencies change
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
@@ -90,13 +96,19 @@ export const CarList = () => {
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
-    debouncedSearch(value);
   };
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      debouncedSearch(value);
+    },
+    [debouncedSearch]
+  );
 
   const handlePageChange = (newPage: number, newPageSize: number) => {
     if (newPageSize !== pageSize) {
-      setPage(1);
       setPageSize(newPageSize);
+      setPage(1);
     } else {
       setPage(newPage);
     }
@@ -198,7 +210,7 @@ export const CarList = () => {
           <SearchBar
             value={inputValue}
             onChange={handleInputChange}
-            onSearch={() => fetchCars()}
+            onSearch={handleSearch}
             disabled={isLoading}
           />
         </Box>
