@@ -27,71 +27,6 @@ import ElectricCarIcon from "@mui/icons-material/ElectricCar";
 import BatteryChargingFullIcon from "@mui/icons-material/BatteryChargingFull";
 import SpeedIcon from "@mui/icons-material/Speed";
 
-const StatCard = ({
-  title,
-  value,
-  icon,
-}: {
-  title: string;
-  value: number;
-  icon: React.ReactNode;
-}) => (
-  <Card
-    sx={{
-      height: "100%",
-      background: "rgba(108, 99, 255, 0.02)",
-      backdropFilter: "blur(10px)",
-      border: "1px solid rgba(108, 99, 255, 0.1)",
-      transition: "all 0.3s ease-in-out",
-      "&:hover": {
-        transform: "translateY(-4px)",
-        boxShadow: (theme) => `0 8px 24px 0 ${theme.palette.primary.main}15`,
-        border: "1px solid rgba(108, 99, 255, 0.2)",
-      },
-    }}
-  >
-    <CardContent>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-        <Box
-          sx={{
-            p: 1,
-            borderRadius: 2,
-            backgroundColor: "primary.main",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            mr: 2,
-          }}
-        >
-          {icon}
-        </Box>
-        <Box>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "text.secondary",
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              mb: 0.5,
-            }}
-          >
-            {title}
-          </Typography>
-          <Typography
-            variant="h5"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: "1.25rem", sm: "1.5rem", md: "1.75rem" },
-              lineHeight: 1,
-            }}
-          >
-            {value.toFixed(1)}
-          </Typography>
-        </Box>
-      </Box>
-    </CardContent>
-  </Card>
-);
-
 export const CarList = () => {
   const navigate = useNavigate();
   const theme = useTheme();
@@ -119,13 +54,8 @@ export const CarList = () => {
     };
   }, [cars]);
 
-  // Create a debounced search function
   const debouncedSearch = useMemo(
-    () =>
-      debounce((value: string) => {
-        setSearchTerm(value);
-        setPage(1); // Reset to first page on search
-      }, 500),
+    () => debounce((value: string) => setSearchTerm(value), 500),
     []
   );
 
@@ -142,17 +72,6 @@ export const CarList = () => {
 
       setCars(response.cars);
       setTotalRows(response.total);
-
-      // Update page if it was adjusted by backend
-      if (response.page !== page) {
-        setPage(response.page);
-      }
-
-      // If we get no results and we're not on the first page,
-      // go back to the last page with results
-      if (response.cars.length === 0 && page > 1) {
-        setPage(Math.max(1, response.totalPages));
-      }
     } catch (error) {
       setError("Failed to fetch cars. Please try again later.");
       console.error("Error fetching cars:", error);
@@ -161,34 +80,27 @@ export const CarList = () => {
     }
   }, [searchTerm, page, pageSize]);
 
-  // Fetch cars when dependencies change
   useEffect(() => {
     fetchCars();
   }, [fetchCars]);
 
-  const handleGridReady = useCallback(() => {
+  const handleGridReady = () => {
     fetchCars();
-  }, [fetchCars]);
+  };
 
-  const handleInputChange = useCallback(
-    (value: string) => {
-      setInputValue(value);
-      debouncedSearch(value);
-    },
-    [debouncedSearch]
-  );
+  const handleInputChange = (value: string) => {
+    setInputValue(value);
+    debouncedSearch(value);
+  };
 
-  const handlePageChange = useCallback(
-    (newPage: number, newPageSize: number) => {
-      if (newPageSize !== pageSize) {
-        setPageSize(newPageSize);
-        setPage(1); // Reset to first page when changing page size
-      } else {
-        setPage(newPage);
-      }
-    },
-    [pageSize]
-  );
+  const handlePageChange = (newPage: number, newPageSize: number) => {
+    if (newPageSize !== pageSize) {
+      setPage(1);
+      setPageSize(newPageSize);
+    } else {
+      setPage(newPage);
+    }
+  };
 
   const handleView = (car: Car) => {
     navigate(`/cars/${car._id}`);
@@ -204,6 +116,48 @@ export const CarList = () => {
   };
 
   const drawerWidth = 280;
+
+  const StatCard = ({
+    title,
+    value,
+    icon,
+  }: {
+    title: string;
+    value: number;
+    icon: React.ReactNode;
+  }) => (
+    <Card
+      sx={{
+        height: "100%",
+        background:
+          "linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(108, 99, 255, 0.05) 100%)",
+      }}
+    >
+      <CardContent>
+        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          {icon}
+          <Typography
+            variant="h6"
+            sx={{
+              ml: 1,
+              fontSize: { xs: "0.9rem", sm: "1rem", md: "1.25rem" },
+            }}
+          >
+            {title}
+          </Typography>
+        </Box>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+          }}
+        >
+          {value.toFixed(1)}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Box
@@ -226,8 +180,8 @@ export const CarList = () => {
             width: { xs: "85%", sm: drawerWidth },
             boxSizing: "border-box",
             border: "none",
-            background: "rgba(108, 99, 255, 0.02)",
-            backdropFilter: "blur(10px)",
+            backgroundImage:
+              "linear-gradient(180deg, rgba(108, 99, 255, 0.05) 0%, rgba(255, 101, 132, 0.05) 100%)",
           },
         }}
       >
@@ -237,18 +191,14 @@ export const CarList = () => {
             sx={{
               mb: { xs: 2, sm: 3 },
               fontSize: { xs: "1.1rem", sm: "1.25rem" },
-              fontWeight: 600,
-              background: "linear-gradient(45deg, #6C63FF, #FF6584)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              color: "transparent",
             }}
           >
-            Discover Electric Cars
+            Filters
           </Typography>
           <SearchBar
             value={inputValue}
             onChange={handleInputChange}
+            onSearch={() => fetchCars()}
             disabled={isLoading}
           />
         </Box>
@@ -265,7 +215,7 @@ export const CarList = () => {
       >
         <Box
           sx={{
-            mb: { xs: 3, sm: 4 },
+            mb: { xs: 2, sm: 3, md: 4 },
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: { xs: 2, sm: 0 },
@@ -283,8 +233,6 @@ export const CarList = () => {
               color: "transparent",
               fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
               textAlign: { xs: "center", sm: "left" },
-              fontWeight: 700,
-              letterSpacing: "-0.01em",
             }}
           >
             Electric Cars Catalog
@@ -300,10 +248,6 @@ export const CarList = () => {
               sx={{
                 width: { xs: "44px", sm: "40px" },
                 height: { xs: "44px", sm: "40px" },
-                backgroundColor: "background.paper",
-                "&:hover": {
-                  backgroundColor: "background.default",
-                },
               }}
             >
               {viewMode === "grid" ? <ViewListIcon /> : <ViewModuleIcon />}
@@ -315,10 +259,6 @@ export const CarList = () => {
                 sx={{
                   width: { xs: "44px", sm: "40px" },
                   height: { xs: "44px", sm: "40px" },
-                  backgroundColor: "background.paper",
-                  "&:hover": {
-                    backgroundColor: "background.default",
-                  },
                 }}
               >
                 <FilterListIcon />
@@ -330,31 +270,40 @@ export const CarList = () => {
         <Grid
           container
           spacing={{ xs: 2, sm: 3 }}
-          sx={{ mb: { xs: 3, sm: 4 } }}
+          sx={{ mb: { xs: 2, sm: 3, md: 4 } }}
         >
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
-              title="Average Acceleration"
+              title="Avg. Acceleration"
               value={stats.avgAccel}
-              icon={<SpeedIcon sx={{ color: "white", fontSize: "1.5rem" }} />}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={4}>
-            <StatCard
-              title="Average Range"
-              value={stats.avgRange}
               icon={
-                <ElectricCarIcon sx={{ color: "white", fontSize: "1.5rem" }} />
+                <SpeedIcon
+                  color="primary"
+                  sx={{ fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" } }}
+                />
               }
             />
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
             <StatCard
-              title="Average Efficiency"
+              title="Avg. Range"
+              value={stats.avgRange}
+              icon={
+                <ElectricCarIcon
+                  color="primary"
+                  sx={{ fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" } }}
+                />
+              }
+            />
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <StatCard
+              title="Avg. Efficiency"
               value={stats.avgEfficiency}
               icon={
                 <BatteryChargingFullIcon
-                  sx={{ color: "white", fontSize: "1.5rem" }}
+                  color="primary"
+                  sx={{ fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" } }}
                 />
               }
             />
@@ -370,11 +319,6 @@ export const CarList = () => {
             borderRadius: { xs: 2, sm: 3 },
             position: "relative",
             overflow: "hidden",
-            border: "1px solid rgba(108, 99, 255, 0.1)",
-            transition: "all 0.3s ease-in-out",
-            "&:hover": {
-              border: "1px solid rgba(108, 99, 255, 0.2)",
-            },
             "&::before": {
               content: '""',
               position: "absolute",
@@ -413,7 +357,6 @@ export const CarList = () => {
           onClose={() => setError(null)}
           sx={{
             width: { xs: "100%", sm: "auto" },
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)",
           }}
         >
           {error}

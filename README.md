@@ -140,9 +140,9 @@ npm test
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👥 Authors
+## 👥 Author
 
-- Your Name - Initial work
+- Muhammad Anas - Initial work
 
 ## 🙏 Acknowledgments
 

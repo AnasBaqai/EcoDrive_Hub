@@ -11,10 +11,8 @@ services:
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://admin:password@mongodb:27017/testdb?authSource=admin
-      - REDIS_URL=redis://redis:6379
     depends_on:
       - mongodb
-      - redis
 
   mongodb:
     image: mongo:latest
@@ -25,14 +23,6 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=password
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
 
   frontend:
     build: 
@@ -50,5 +40,4 @@ services:
       - api
 
 volumes:
-  mongodb_data:
-  redis_data: 
+  mongodb_data: 
