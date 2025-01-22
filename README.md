@@ -220,7 +220,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 Here is a demo of the project:
 
+## Project Demo
+
 <video controls width="600">
-  <source src="demo.mov" type="video/quicktime">
+  <source src="https://github.com/user-attachments/assets/475c4322-89e4-422c-96aa-021062244c6e" type="video/mp4">
   Your browser does not support the video tag.
 </video>
