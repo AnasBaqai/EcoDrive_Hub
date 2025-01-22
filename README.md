@@ -59,8 +59,8 @@ docker-compose up -d
 
 This will start:
 
-- Frontend application (available at http://localhost:3000)
-- Backend API (available at http://localhost:5000)
+- Frontend application (available at http://localhost:5173)
+- Backend API (available at http://localhost:3000)
 - MongoDB database
 
 3. Import sample data into MongoDB:
