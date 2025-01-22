@@ -215,3 +215,12 @@ interface DataGridProps {
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+# Demo
+
+Here is a demo of the project:
+
+<video controls width="600">
+  <source src="demo.mov" type="video/quicktime">
+  Your browser does not support the video tag.
+</video>
