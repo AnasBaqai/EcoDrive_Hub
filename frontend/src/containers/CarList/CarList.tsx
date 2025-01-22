@@ -247,7 +247,7 @@ export const CarList = () => {
               textAlign: { xs: "center", sm: "left" },
             }}
           >
-            Electric Cars Catalog
+            EcoDrive Hub
           </Typography>
           <Stack
             direction="row"
